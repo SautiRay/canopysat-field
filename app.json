@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "CanopySat Field",
+    "slug": "canopysat-field",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "canopysatfield",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D3B2E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.canopysat.field"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0D3B2E"
+      },
+      "package": "org.canopysat.field",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-location",
+      "expo-camera"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "35f02841-2bee-4af1-83a5-610308fdaaf0"
+      }
+    },
+    "owner": "canopysat"
+  }
+}
