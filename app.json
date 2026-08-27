@@ -57,7 +57,15 @@
       "expo-media-library",
       "expo-sqlite",
       "expo-sharing",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-mail-composer",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0D3B2E"
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { registerForPushNotifications, sendDeforestationAlert, shareResult } from './utils';
 
 const CANOPYSAT_API = 'https://www.canopysat.org';
 
@@ -95,6 +96,7 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
   useEffect(() => {
     requestLocationPermission();
     loadCachedResult();
+    registerForPushNotifications();
   }, []);
 
   const loadCachedResult = async () => {
@@ -152,6 +154,7 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
         setResult(data);
         onResult(data);
         await AsyncStorage.setItem('lastResult', JSON.stringify(data));
+        await sendDeforestationAlert(data, lang);
       } else {
         Alert.alert('Error', data.error || 'Analysis failed');
       }
@@ -364,5 +367,7 @@ const styles = StyleSheet.create({
   satsTxt: { color: '#2D6A4F', fontSize: 8, marginTop: 8, textAlign: 'center' },
   pdfBtn: { backgroundColor: '#0D3B2E', borderWidth: 1, borderColor: '#3DAA6B', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 8 },
   pdfTxt: { color: '#3DAA6B', fontSize: 12, fontWeight: 'bold' },
+  shareBtn: { backgroundColor: '#1B6B45', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 6 },
+  shareTxt: { color: 'white', fontSize: 12, fontWeight: 'bold' },
   satItem: { color: '#D6EFE1', fontSize: 10, marginBottom: 3 },
 });

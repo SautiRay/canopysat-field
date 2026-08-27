@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { exportInventoryCSV, emailInventory } from './utils';
 
 const SPECIES = [
   'Acacia', 'Eucalyptus', 'Teak', 'Mahogany', 'Cedar',
@@ -123,6 +124,17 @@ export default function InventoryScreen({ lang }) {
             <Text style={styles.summaryNum}>{totalBiomass.toFixed(1)}</Text>
             <Text style={styles.summaryLabel}>{t('Total AGB (kg)', 'Biomasse (kg)')}</Text>
           </View>
+        </View>
+      )}
+
+      {trees.length > 0 && (
+        <View style={styles.exportRow}>
+          <TouchableOpacity style={styles.exportBtn} onPress={() => exportInventoryCSV(trees, lang)}>
+            <Text style={styles.exportTxt}>📊 {t('Export CSV', 'Exporter CSV')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.exportBtn} onPress={() => emailInventory(trees, lang)}>
+            <Text style={styles.exportTxt}>📧 {t('Send Email', 'Envoyer Email')}</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -289,4 +301,7 @@ const styles = StyleSheet.create({
   cancelTxt: { color: '#D6EFE1', fontSize: 13 },
   saveBtn: { flex: 1, padding: 12, borderRadius: 8, backgroundColor: '#2D8A5A', alignItems: 'center' },
   saveTxt: { color: 'white', fontSize: 13, fontWeight: 'bold' },
+  exportRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 12, paddingBottom: 8, backgroundColor: '#0A2E20' },
+  exportBtn: { flex: 1, backgroundColor: '#1B4332', borderRadius: 8, padding: 8, alignItems: 'center', borderWidth: 1, borderColor: '#1B6B45' },
+  exportTxt: { color: '#3DAA6B', fontSize: 11, fontWeight: 'bold' },
 });
