@@ -26,10 +26,9 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "CAMERA",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
       ]
     },
     "web": {
@@ -39,7 +38,12 @@
     },
     "plugins": [
       "expo-location",
-      "expo-camera"
+      "expo-camera",
+      "expo-image-picker",
+      "expo-media-library",
+      "expo-sqlite",
+      "expo-sharing",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
