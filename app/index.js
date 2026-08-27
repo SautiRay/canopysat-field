@@ -114,10 +114,21 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
 
   const getCurrentLocation = async () => {
     try {
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      // Force fresh GPS reading - no cache
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+        maximumAge: 0,
+        timeout: 15000
+      });
       setLocation(loc.coords);
     } catch(e) {
-      Alert.alert('GPS Error', 'Could not get location');
+      // Fallback to last known position
+      try {
+        const last = await Location.getLastKnownPositionAsync({});
+        if (last) setLocation(last.coords);
+      } catch(e2) {
+        Alert.alert('GPS Error', 'Could not get location');
+      }
     }
   };
 
@@ -158,18 +169,11 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
     setPdfLoading(true);
     try {
       const { openBrowserAsync } = await import('expo-web-browser');
-      const payload = {...result, lang};
-      const response = await fetch(`${CANOPYSAT_API}/report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) throw new Error('Server error');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      await openBrowserAsync(url);
+      // Build query params from result
+      const params = `lat=${result.lat}&lng=${result.lng}&lang=${lang}&score=${result.score}`;
+      await openBrowserAsync(`${CANOPYSAT_API}/report-view?${params}`);
     } catch(e) {
-      Alert.alert('Error', 'Could not generate PDF: ' + e.message);
+      Alert.alert('Error', 'Could not open PDF: ' + e.message);
     } finally {
       setPdfLoading(false);
     }
