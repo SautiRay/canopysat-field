@@ -158,12 +158,18 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
     setPdfLoading(true);
     try {
       const { openBrowserAsync } = await import('expo-web-browser');
-      const params = new URLSearchParams({
-        lat: result.lat, lng: result.lng, lang
+      const payload = {...result, lang};
+      const response = await fetch(`${CANOPYSAT_API}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      await openBrowserAsync(`${CANOPYSAT_API}/report?${params}`);
+      if (!response.ok) throw new Error('Server error');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      await openBrowserAsync(url);
     } catch(e) {
-      Alert.alert('Error', 'Could not open PDF');
+      Alert.alert('Error', 'Could not generate PDF: ' + e.message);
     } finally {
       setPdfLoading(false);
     }
@@ -173,7 +179,7 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
   const fmt = (v) => v != null ? (v >= 0 ? '+' : '') + v : 'N/A';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('title')}</Text>
         <View style={styles.langSwitch}>
@@ -302,7 +308,7 @@ export default function HomeScreen({ lang, setLang, onResult, lastResult }) {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

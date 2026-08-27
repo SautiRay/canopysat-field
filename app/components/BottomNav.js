@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const tabs = [
   { key: 'home', icon: '🔍', labelEn: 'Analyze', labelFr: 'Analyser' },
@@ -9,8 +10,10 @@ const tabs = [
 ];
 
 export default function BottomNav({ current, onNavigate, lang }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.nav}>
+    <View style={[styles.nav, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {tabs.map(tab => (
         <TouchableOpacity
           key={tab.key}
@@ -32,14 +35,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A2E20',
     borderTopWidth: 2,
     borderTopColor: '#1B6B45',
-    paddingBottom: 5,
+    paddingTop: 6,
   },
   tab: {
-    flex: 1, alignItems: 'center',
-    paddingVertical: 8,
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 6,
   },
-  activeTab: { borderTopWidth: 2, borderTopColor: '#3DAA6B' },
-  icon: { fontSize: 20 },
-  label: { color: '#D6EFE1', fontSize: 10, marginTop: 2 },
+  activeTab: {
+    borderTopWidth: 2,
+    borderTopColor: '#3DAA6B',
+  },
+  icon: { fontSize: 18 },
+  label: { color: '#D6EFE1', fontSize: 9, marginTop: 2 },
   activeLabel: { color: '#3DAA6B', fontWeight: 'bold' },
 });

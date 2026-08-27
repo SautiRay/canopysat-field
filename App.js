@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StatusBar, Platform } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import HomeScreen from './app/index';
 import MapScreen from './app/map';
 import PhotoScreen from './app/photos';
@@ -22,13 +23,19 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      {renderScreen()}
-      <BottomNav current={currentScreen} onNavigate={setCurrentScreen} lang={lang} />
-    </View>
+    <SafeAreaProvider>
+      <StatusBar barStyle="light-content" backgroundColor="#0D3B2E" />
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+        <View style={styles.screen}>
+          {renderScreen()}
+        </View>
+        <BottomNav current={currentScreen} onNavigate={setCurrentScreen} lang={lang} />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D3B2E' }
+  container: { flex: 1, backgroundColor: '#0D3B2E' },
+  screen: { flex: 1 },
 });

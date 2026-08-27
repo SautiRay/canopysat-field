@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import MapView, { Marker, Polygon } from 'react-native-maps';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 
 export default function MapScreen({ lang, lastResult }) {
   const [location, setLocation] = useState(null);
-  const [region, setRegion] = useState({
-    latitude: 0, longitude: 0,
-    latitudeDelta: 60, longitudeDelta: 60
-  });
 
   const t = (en, fr) => lang === 'fr' ? fr : en;
 
-  useEffect(() => {
-    getLocation();
-  }, []);
+  useEffect(() => { getLocation(); }, []);
 
   const getLocation = async () => {
     try {
@@ -22,79 +16,63 @@ export default function MapScreen({ lang, lastResult }) {
       if (status === 'granted') {
         const loc = await Location.getCurrentPositionAsync({});
         setLocation(loc.coords);
-        setRegion({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1
-        });
       }
     } catch(e) {}
   };
 
-  const goToResult = () => {
-    if (lastResult) {
-      setRegion({
-        latitude: lastResult.lat,
-        longitude: lastResult.lng,
-        latitudeDelta: 0.1,
-        longitudeDelta: 0.1
-      });
-    }
-  };
-
   const getScoreColor = (s) => s >= 70 ? '#3DAA6B' : s >= 40 ? '#F9A825' : '#E53935';
+
+  const lat = lastResult?.lat || location?.latitude || 0;
+  const lng = lastResult?.lng || location?.longitude || 0;
+
+  const mapHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>* { margin:0; padding:0; } #map { width:100%; height:100vh; }</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  var map = L.map('map').setView([${lat || 0}, ${lng || 0}], ${lat ? 12 : 3});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri', maxZoom: 18
+  }).addTo(map);
+  L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18, opacity: 0.8
+  }).addTo(map);
+  ${lastResult ? `L.marker([${lastResult.lat}, ${lastResult.lng}]).addTo(map).bindPopup('<b>Score: ${lastResult.score}/100</b><br>${lastResult.ai_forest_type || ''}').openPopup();` : ''}
+  ${location ? `L.circleMarker([${location.latitude}, ${location.longitude}], {color:'#3DAA6B',fillColor:'#3DAA6B',fillOpacity:0.8,radius:8}).addTo(map).bindPopup('Your location');` : ''}
+</script>
+</body>
+</html>`;
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>🗺️ {t('Satellite Map', 'Carte Satellite')}</Text>
-        {lastResult && (
-          <TouchableOpacity style={styles.btn} onPress={goToResult}>
-            <Text style={styles.btnTxt}>📍 {t('Last analysis', 'Dernière analyse')}</Text>
-          </TouchableOpacity>
-        )}
       </View>
-
-      <MapView
+      <WebView
         style={styles.map}
-        region={region}
-        onRegionChangeComplete={setRegion}
-        mapType="satellite"
-        showsUserLocation={true}
-        showsMyLocationButton={true}>
-
-        {/* Current location marker */}
-        {location && (
-          <Marker
-            coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-            title={t('Your location', 'Votre position')}
-            pinColor="#3DAA6B"
-          />
-        )}
-
-        {/* Last analysis marker */}
-        {lastResult && (
-          <Marker
-            coordinate={{ latitude: lastResult.lat, longitude: lastResult.lng }}
-            title={`Score: ${lastResult.score}/100`}
-            description={lastResult.ai_forest_type || ''}
-            pinColor={getScoreColor(lastResult.score)}
-          />
-        )}
-      </MapView>
-
-      {/* Result overlay */}
+        source={{ html: mapHtml }}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        allowsInlineMediaPlayback={true}
+      />
       {lastResult && (
         <View style={styles.overlay}>
-          <Text style={styles.overlayScore} style={{ color: getScoreColor(lastResult.score) }}>
+          <Text style={[styles.overlayScore, { color: getScoreColor(lastResult.score) }]}>
             {lastResult.score}/100
           </Text>
           <Text style={styles.overlayType}>
             {lang === 'fr' ? lastResult.ai_forest_type_fr : lastResult.ai_forest_type}
           </Text>
           <Text style={styles.overlayCoords}>
-            {lastResult.lat?.toFixed(4)}, {lastResult.lng?.toFixed(4)}
+            📍 {lastResult.lat?.toFixed(4)}, {lastResult.lng?.toFixed(4)}
           </Text>
         </View>
       )}
@@ -104,13 +82,11 @@ export default function MapScreen({ lang, lastResult }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0D3B2E' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 2, borderBottomColor: '#1B6B45' },
+  header: { padding: 12, borderBottomWidth: 2, borderBottomColor: '#1B6B45' },
   title: { color: 'white', fontSize: 14, fontWeight: 'bold' },
-  btn: { backgroundColor: '#1B6B45', padding: 6, borderRadius: 8 },
-  btnTxt: { color: 'white', fontSize: 11 },
   map: { flex: 1 },
-  overlay: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(10,46,32,0.9)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#3DAA6B' },
-  overlayScore: { fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
-  overlayType: { color: 'white', fontSize: 13, textAlign: 'center', marginTop: 3 },
+  overlay: { position: 'absolute', bottom: 20, left: 20, right: 20, backgroundColor: 'rgba(10,46,32,0.95)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#3DAA6B' },
+  overlayScore: { fontSize: 22, fontWeight: 'bold', textAlign: 'center' },
+  overlayType: { color: 'white', fontSize: 12, textAlign: 'center', marginTop: 3 },
   overlayCoords: { color: '#D6EFE1', fontSize: 10, textAlign: 'center', marginTop: 3 },
 });
