@@ -10,9 +10,11 @@
       "channel": "development"
     },
     "preview": {
+      "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     },
     "production": {
       "autoIncrement": true,
