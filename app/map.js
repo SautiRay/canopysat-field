@@ -23,22 +23,29 @@ export default function MapScreen({ lang, lastResult }) {
   };
 
   const searchLocation = async () => {
-    if (!search) return;
+    if (!search.trim()) return;
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(search)}&limit=1`
+        'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(search.trim()) + '&limit=1',
+        { headers: { 'User-Agent': 'CanopySat Field App' } }
       );
       const data = await response.json();
-      if (data.length > 0) {
-        const { lat, lon } = data[0];
-        webViewRef.current?.injectJavaScript(`
-          map.setView([${lat}, ${lon}], 12);
-          L.marker([${lat}, ${lon}]).addTo(map).bindPopup('${search}').openPopup();
-          true;
-        `);
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        const name = data[0].display_name || search;
+        webViewRef.current?.injectJavaScript(
+          'map.setView([' + lat + ',' + lon + '], 12);' +
+          'L.marker([' + lat + ',' + lon + ']).addTo(map).bindPopup("' + search.trim() + '").openPopup();' +
+          'true;'
+        );
         setSearch('');
+      } else {
+        Alert.alert('Not found', 'Location "' + search + '" not found. Try another name.');
       }
-    } catch(e) {}
+    } catch(e) {
+      Alert.alert('Error', 'Search failed: ' + e.message);
+    }
   };
 
   const goToMyLocation = () => {
