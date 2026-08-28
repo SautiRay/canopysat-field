@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Share, Alert } from 'react-native';
 
 // ═══ NOTIFICATIONS ═══
