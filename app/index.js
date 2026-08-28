@@ -369,5 +369,6 @@ const styles = StyleSheet.create({
   pdfTxt: { color: '#3DAA6B', fontSize: 12, fontWeight: 'bold' },
   shareBtn: { backgroundColor: '#1B6B45', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 6 },
   shareTxt: { color: 'white', fontSize: 12, fontWeight: 'bold' },
+  shareTxt: { color: 'white', fontSize: 12, fontWeight: 'bold' },
   satItem: { color: '#D6EFE1', fontSize: 10, marginBottom: 3 },
 });
